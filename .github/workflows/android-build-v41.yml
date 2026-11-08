@@ -1,0 +1,52 @@
+name: Compilar JogueLog Vision V4.1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'JogueLog_GitHub_Source_V4_1.zip'
+      - '.github/workflows/android-build-v41.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Descompactar projeto V4.1
+        run: |
+          mkdir -p projeto
+          unzip -o JogueLog_GitHub_Source_V4_1.zip -d projeto
+
+      - name: Compilar APK de teste V4.1
+        working-directory: projeto
+        run: gradle assembleDebug --stacktrace
+
+      - name: Compilar AAB de teste V4.1
+        working-directory: projeto
+        run: gradle bundleDebug --stacktrace
+
+      - name: Salvar APK V4.1
+        uses: actions/upload-artifact@v4
+        with:
+          name: JogueLog-V4.1-APK-Teste
+          path: projeto/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Salvar AAB V4.1
+        uses: actions/upload-artifact@v4
+        with:
+          name: JogueLog-V4.1-AAB-Teste
+          path: projeto/app/build/outputs/bundle/debug/app-debug.aab
